@@ -62,7 +62,7 @@ pred_rf <- predict(model_rf, newdata = test)
 confusionMatrix(pred_rf, test$classe)$overall[1]
 ```
 
-With an accuracy of 0.997 our model is performing extremely well and we continue to use it 
+With an accuracy of 0.997 (and thus out of sample error 1-0.997 = 0.003) our model is performing extremely well and we continue to use it 
 to predict the 'classe' on the 20 different cases in the original testing data set. 
 
 ```{r model implementation, warning=FALSE}

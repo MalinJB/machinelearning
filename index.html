@@ -183,7 +183,7 @@ model_rf</code></pre>
 confusionMatrix(pred_rf, test$classe)$overall[1]</code></pre>
 <pre><code>##  Accuracy 
 ## 0.9974509</code></pre>
-<p>With an accuracy of 0.997 our model is performing extremely well and we continue to use it to predict the ‘classe’ on the 20 different cases in the original testing data set.</p>
+<p>With an accuracy of 0.997 (and thus out of sample error 1-0.997 = 0.003) our model is performing extremely well and we continue to use it to predict the ‘classe’ on the 20 different cases in the original testing data set.</p>
 <pre class="r"><code>predict(model_rf, newdata = testing)</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
