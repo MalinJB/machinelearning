@@ -1,0 +1,73 @@
+Practical Machine Learning, Prediction Assignment
+=================================================
+Malin Jonsson Boezelman, 30 Dec 2016
+
+###Brief Background
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. In this project we use data from http://groupware.les.inf.puc-rio.br/har to train a model into predicting how people perform an exercise. 
+
+###Data pre-processing
+We start by downloading the data from the website as two files, one to train our 
+prediction algorithm (training set) and one to evaluate how well it performs (testing set).
+
+```{r get data, warning=FALSE, message=FALSE}
+library(caret)
+
+#Get data
+fileUrlTrain <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+fileUrlTest <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+download.file(fileUrlTrain, destfile = "./data/train.csv")
+download.file(fileUrlTest, destfile = "./data/test.csv")
+
+training <- read.csv("./data/train.csv", na.strings = c("", "NA", "NULL")) 
+testing <- read.csv("./data/test.csv", na.strings = c("", "NA", "NULL")) 
+```
+
+The data set contains 160 variables which are not all useful to our analysis. 
+We therefore reduce the number of variables by:
+1) removing the first six that are merely descriptive
+2) remove all variables that contain more than 10% missing values (NAs)
+
+
+```{r reduce dataset, warning=FALSE}
+#Reduce dataset
+training <- training[, 7:160]
+testing  <- testing[, 7:160]
+
+training <- training[ , colSums(is.na(training)) < 2000]  
+testing <- testing[ , colSums(is.na(testing)) < 2000]
+```
+
+###Train a Random Forest Model using Cross Validation
+With this reduced data set we continue to split the training set into a train 
+and test set that will allow for cross validation during the training of our model.  
+We have chosen to use a particular combination of trControl parameters to avoid the 
+very time consuming default bootstrapping otherwise used (thanks to jscrane for the tip!)
+
+```{r model training, warning=FALSE, message=FALSE}
+set.seed(34455)
+inTrain <- createDataPartition(y = training$classe, p = 0.6, list = FALSE)
+train <- training[inTrain,] 
+test <- training[-inTrain,]
+
+ctrl <- trainControl(allowParallel = T, method = "cv", number = 4)
+model_rf <- train(classe ~ ., data = train, model = "rf", ntree = 100, trControl = ctrl)
+model_rf
+```
+
+With the most optimal model found we test it on our test data set using cross validation.
+
+```{r cross validation, warning=FALSE}
+pred_rf <- predict(model_rf, newdata = test)
+confusionMatrix(pred_rf, test$classe)$overall[1]
+```
+
+With an accuracy of 0.997 our model is performing extremely well and we continue to use it 
+to predict the 'classe' on the 20 different cases in the original testing data set. 
+
+```{r model implementation, warning=FALSE}
+predict(model_rf, newdata = testing)
+```
+
+
+
